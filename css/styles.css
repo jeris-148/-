@@ -1,0 +1,694 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+html {
+  overflow-x: hidden;
+}
+
+body {
+  font-family: "Muli", sans-serif;
+  overflow-x: hidden;
+}
+
+:root {
+  --yellow: #ffa700;
+}
+/* General Classes*/
+.wrapper__page {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.btn-general {
+  border: 1px solid var(--yellow);
+  padding: 0.75rem 3.5rem;
+}
+
+.btn-general:hover {
+  background: var(--yellow);
+  color: white;
+}
+
+/* General Classes*/
+
+/* Navbar */
+#mainNav {
+  background-color: #d3d3d3;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+ 
+
+.navbar-dark .navbar-nav .nav-link {
+  color: #000000;
+}
+
+#mainNav .navbar-brand {
+  transition: font-size 0.3s ease-in-out;
+}
+
+.nav-link {
+  font-weight: bold; /* הופך את הטקסט למודגש */
+  font-size: 18px; /* מגדיל את גודל הפונט */
+  color: black; /* משנה את צבע הטקסט לשחור */
+  padding: 10px 30px; /* מוסיף ריווח פנימי לכפתורים */
+  text-transform: uppercase; /* הופך את הטקסט לאותיות גדולות */
+}
+
+.nav-link:hover {
+  color: #000000; /* משנה את צבע הטקסט לאדום כאשר מרחפים מעל הכפתור */
+  transition: color 0.3s ease; /* מוסיף מעבר חלק בעת שינוי הצבע */
+}
+
+#navbarNav a:hover {
+  color: var(--yellow);
+}
+
+.nav-item {
+  margin: 1rem 0.9rem;
+}
+
+.navbar-dark .navbar-brand {
+  font-size: 2rem;
+  font-weight: 700;
+  color: rgb(0, 0, 0);
+}
+
+#mainNav.navbar-shrink {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  background-color: #fffefe;
+  margin: 0 auto;
+}
+#mainNav.navbar-shrink .navbar-brand {
+  font-size: 1.5em;
+}
+#mainNav.navbar-shrink .navbar-brand svg,
+#mainNav.navbar-shrink .navbar-brand img {
+  height: 1.5rem;
+}
+
+@media screen and (min-width: 992px) {
+  #mainNav {
+    background-color: transparent;
+    transition: padding-top 0.3s ease-in-out, padding-bottom 0.3s ease-in-out;
+  }
+  .nav-item {
+    margin: 1rem 0.9rem;
+  }
+  .btn-navbar {
+    margin-left: 1rem;
+  }
+  .nav-link:visited {
+    color: black !important; /* גם לאחר שהקישור נלחץ, הצבע יישאר שחור */
+}
+
+.nav-link:active {
+    color: black !important; /* הצבע נשאר שחור כשהקישור נבחר */
+}
+}
+.custom-btn {
+  background-color: black; /* צבע רקע שחור */
+  color: rgb(251, 251, 251); /* צבע טקסט לבן */
+  border: 2px solid white; /* מסגרת לבנה */
+  padding: 10px 20px; /* מרווחים פנימיים בכפתור */
+  font-size: 16px; /* גודל טקסט */
+  text-transform: uppercase; /* טקסט באותיות גדולות */
+  border-radius: 5px; /* פינות מעוגלות */
+  transition: background-color 0.3s ease, color 0.3s ease; /* מעבר חלק בין מצבים */
+}
+
+.custom-btn:hover {
+  background-color: rgb(0, 0, 0); /* צבע רקע לבן כאשר מרחפים מעל הכפתור */
+  color: black; /* צבע טקסט שחור כאשר מרחפים מעל הכפתור */
+}
+.custom-paragraph {
+  font-size: 30px; /* מגדיר את גודל הפונט כך שיהיה גדול יותר */
+  color: rgb(0, 0, 0); /* משנה את צבע הטקסט ללבן (או כל צבע בהיר אחר) */
+  font-weight: bold; /* הופך את הטקסט למודגש יותר */
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.10); /* מוסיף צללה לטקסט */
+  letter-spacing: 3px; /* מוסיף רווח קטן בין האותיות */
+  margin-bottom: 25px; /* מוסיף רווח תחתון */
+}
+
+/* Navbar*/
+
+/*Mastehead*/
+
+/* Masthead */
+.masthead {
+  background-image: url("/img/DALL·E 2024-10-03 18.11.02 - A modern background image featuring construction sites, showcasing cranes, scaffolding, and under-construction buildings. The design should maintain a.webp");
+  width: 100%;
+  height: 130vh;
+  max-height:90vmax;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  /*padding-top: 17rem;*/
+}
+
+.masthead .container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.masthead-heading {
+  color: rgb(1, 1, 4);
+  margin-bottom: 0rem;
+}
+
+.masthead-heading h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.masthead-heading p {
+  font-size: 1rem;
+}
+
+.btn-masthead {
+  background-color: var(--yellow);
+  color: rgb(0, 0, 0);
+  padding: 0.75rem 3rem;
+  border: 2px solid var(--yellow);
+  margin-top: 1rem;
+}
+
+.btn-masthead:hover {
+  background-color: transparent;
+  border: 2px solid var(--yellow);
+  color: white;
+}
+
+@media screen and (min-width: 768px) {
+  .masthead-heading h1 {
+    font-size: 3rem;
+  }
+
+  .masthead-heading p {
+    font-size: 1.5rem;
+  }
+  .btn-masthead {
+    margin-top: 2rem;
+  }
+}
+/*Mastehead*/
+
+/* About Us*/
+.about {
+  padding-top: 100px; /* הוספת מרווח עליון כדי לאפשר מקום מתחת לניווט */
+  margin-top: -100px; /* מזיז מעט את הסעיף כך שהגלילה תתיישב טוב */
+}
+
+.about .card {
+  min-width: 210px;
+  border: none;
+}
+
+.about .card-body {
+  border: 1px solid var(--yellow);
+  border-top: none;
+  border-bottom-left-radius: 11px;
+  border-bottom-right-radius: 11px;
+}
+
+/* About Us*/
+
+/* Projects*/
+
+.projects {
+  background-color: #ffffff;
+  min-height: 450px;
+}
+
+.projects .nav-pills .nav-link.active,
+.projects .nav-pills .show > .nav-link {
+  background-color: var(--yellow);
+}
+
+.projects a {
+  color: #000000;
+  background-color: #c6c5c5;
+  padding: 0.75rem 2rem;
+  font-size: 0.75rem;
+}
+
+.projects .row div {
+  transition: opacity 0.7s ease-in-out;
+  cursor: pointer;
+}
+
+.project__img {
+  overflow: hidden;
+}
+
+.project__img img {
+  transition: transform 0.5s ease-in-out;
+}
+
+.project__img img:hover {
+  transform: scale(1.05);
+  opacity: 0.8;
+}
+
+
+/* Projects*/
+
+/* Our workflow*/
+.workflow {
+  background-image: url("/img/workflow/background.png");
+  width: 100%;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+}
+
+.workflow h2,
+.workflow h5 {
+  color: var(--yellow);
+}
+
+.workflow h4,
+.workflow p {
+  color: rgb(255, 255, 255);
+}
+
+
+/* Our workflow*/
+
+/* what people say */
+.people {
+  padding: 5rem 2rem;
+  background: #24213a;
+}
+
+.people .card {
+  overflow: show;
+  box-shadow: 0px 11px 21px hsla(229, 64%, 33%, 0.5);
+  border: none;
+  border-bottom: 5px solid var(--yellow);
+}
+.people h2 {
+  color: white; /* משנה את צבע הכותרת ללבן */
+}
+.people .card img {
+  margin-top: -50px;
+}
+
+.carousel-inner {
+  padding-top: 3.2rem;
+}
+
+.carousel-indicators {
+  bottom: -60px;
+}
+
+.carousel-indicators > li {
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  background-color: var(--yellow);
+}
+
+/* what people say */
+
+/* Our Services*/
+.services {
+  background-color: white;
+  margin-top: 4rem;
+}
+
+.service {
+  background-color: white;
+  color: #3a3a3a;
+  padding: 1.5rem 0;
+}
+.feedback {
+    background-color: #f8f9fa;
+    padding: 50px 0;
+    font-family: Arial, sans-serif;
+}
+
+.feedback h2,
+.feedback__subtitle {
+    color: #333;
+}
+
+.feedback-form {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.feedback-form label {
+    color: #333;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.feedback-form input,
+.feedback-form select,
+.feedback-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.feedback-form .form-buttons button {
+    background-color: #28a745;
+    color: white;
+    padding: 12px 30px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.feedback-form .form-buttons button:hover {
+    background-color: #218838;
+}
+.feedback {
+  background-image: url("./img/people/smiling-architect-holding-tablet-showing-construction-worker-something-he-imagined-construction-worker-holding-blueprints-construction-site-interior_2.avif"); /* הכנס כאן את נתיב התמונה */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* אפקט פרלקס */
+  padding: 50px 0;
+  font-family: Arial, sans-serif;
+  color: white;
+}
+
+.feedback-form {
+  background-color: rgba(255, 255, 255, 0.8); /* רקע שקוף לטופס */
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.feedback-form label {
+  color: #333;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.feedback-form input,
+.feedback-form select,
+.feedback-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+.feedback-form .form-buttons button {
+  background-color: #28a745;
+  color: white;
+  padding: 12px 30px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.feedback-form .form-buttons button:hover {
+  background-color: #218838;
+}
+
+/* Our Services*/
+
+/* Our Company */
+.company__text {
+  box-shadow: 0px 11px 21px hsla(210, 10%, 4%, 0.5);
+}
+
+.company__img.col-lg-6 {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.company__list {
+  line-height: 2;
+  list-style-type: none;
+}
+
+.company__list li::before {
+  content: "•";
+  color: var(--yellow);
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
+  font-size: 16px;
+}
+
+@media screen and (min-width: 1200px) {
+  .company__text.col-lg-6 {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+/* Our Company */
+
+/* Blog */
+.blog {
+  margin-top: 4rem;
+}
+
+.blog .card {
+  min-width: 210px;
+  border: none;
+}
+
+.blog .card-body {
+  border: 1px solid var(--yellow);
+  border-top: none;
+  border-bottom: none;
+  color: #3a3a3a;
+}
+
+.blog .card-footer {
+  border: 1px solid var(--yellow);
+  border-top: none;
+  border-bottom-left-radius: 11px;
+  border-bottom-right-radius: 11px;
+}
+
+.blog .card-footer a {
+  color: var(--yellow);
+  text-decoration: none;
+}
+
+.blog .card-footer a:hover {
+  opacity: 0.7;
+}
+
+/* Blog Posts*/
+
+/* Banner */
+.banner {
+  background-image: url("/img/banner.png");
+  width: 100%;
+  min-height: 300px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  position: relative;
+  z-index: 1;
+  font-size: 2rem;
+}
+
+.banner:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #283143b7;
+  z-index: -1;
+}
+
+.banner__number {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 0;
+}
+
+.banner__text {
+  font-size: 1.5rem;
+}
+
+@media screen and (max-width: 991px) {
+  .banner__text {
+    font-size: 1rem;
+  }
+}
+/* Banner */
+
+/* Contact */
+.contact__subtitle {
+  font-size: 1.3rem;
+}
+
+.contact__icon {
+  font-size: 2rem;
+  color: var(--yellow);
+}
+
+.contact__color {
+  color: var(--yellow);
+}
+
+.contact__text {
+  min-width: 230.38px;
+}
+/* Contact */
+.contact {
+    background-image: url('path_to_your_image.jpg'); /* הכנס כאן את הנתיב לתמונה שלך */
+    background-size: cover; /* תמונה תכסה את כל הרקע */
+    background-position: center; /* מיקום מרכזי של התמונה */
+    background-repeat: no-repeat; /* לא לחזור על התמונה */
+    background-attachment: fixed; /* התמונה נשארת קבועה בעת גלילה */
+    padding: 50px 0;
+    font-family: Arial, sans-serif;
+    color: white; /* לשנות צבע הטקסט ללבן */
+}
+
+.contact h2,
+.contact__subtitle {
+    color: rgb(0, 0, 0); /* כדי שהכותרות יראו טוב על רקע התמונה */
+}
+
+.contact-form {
+    background-color: rgba(255, 255, 255, 0.8); /* רקע לבן שקוף לטופס כדי שיבלוט על רקע התמונה */
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.contact-form label {
+    color: #333; /* שמירה על צבע כהה לטקסט בשדות */
+}
+
+.contact-form input,
+.contact-form textarea {
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+.contact-form .form-buttons button {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 30px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.contact-form .form-buttons button:hover {
+    background-color: #0056b3;
+}
+
+/* Footer */
+.footer {
+  position: relative;
+  background-color: #000000;
+  color: white;
+  overflow: hidden;
+}
+
+.footer .container {
+  padding: 0 6rem;
+}
+
+.footer input {
+  border-radius: 0;
+ background-clip: inherit;
+}
+
+.btn-contact {
+  background-color: var(--yellow);
+  color: white;
+  border-radius: 0px;
+  border: solid var(--yellow);
+  border-width: 1px 1px;
+}
+
+.btn-contact:hover {
+  background-color: transparent;
+  color: white;
+}
+
+.footer__icon {
+  font-size: 1.5rem;
+  color: var(--yellow);
+}
+
+@media screen and (max-width: 500px) {
+  .footer .container {
+    padding: 0 3rem;
+  }
+}
+
+/* Footer */
+
+/* Back to top button*/
+
+.back-to-top {
+  position: fixed;
+  color: var(--yellow);
+  bottom: 25px;
+  right: 25px;
+  font-size: 3.5rem;
+  z-index: 100;
+}
+
+.back-to-top .backIcon {
+  background-color: white;
+  border: 2x solid var(--yellow);
+  border-radius: 50%;
+  padding: 10px;
+}
+
+.back-to-top .backIcon:hover {
+  color: white;
+  background-color: var(--yellow);
+}
+
+.back-to-top:hover .backIcon {
+  color: white;
+  background-color: var(--yellow);
+}
+
+.back-to-top .backIcon:active {
+  color: white;
+  background-color: var(--yellow);
+}
+
+/* Back to top button*/

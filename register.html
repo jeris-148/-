@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        /* תמונת הרקע */
+        .bg-image {
+            background-image: url("./img/projects/Eu0Gk.jpg"); /* קישור לתמונה */
+            background-size: cover;
+            background-position: center;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .form-container {
+            background-color: rgba(107, 82, 82, 0.2); /* רקע שקוף יותר לטופס */
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            border-radius: 8px;
+            position: relative;
+            z-index: 1;
+            margin: auto;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white; /* צבע הטקסט הלבן */
+        }
+
+        .form-container h2 {
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: white; /* צבע לבן לתוויות */
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            background-color: rgba(255, 255, 255, 0.3); /* רקע בהיר לשדות הטופס */
+            border: none;
+            color: white; /* צבע הטקסט בתוך השדות */
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .form-buttons button {
+            width: 100%;
+            padding: 10px;
+            background-color: #1e252c;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .form-buttons button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- תמונת הרקע -->
+    <div class="bg-image"></div>
+
+    <!-- טופס ההרשמה -->
+    <div class="form-container">
+        <h2 id="form-title">Register</h2>
+        <form action="/auth/register" method="POST">
+            <!-- שדות עבור טופס הרשמה -->
+            <div class="form-group">
+                <label for="firstname">First Name</label>
+                <input type="text" id="firstname" name="firstname" required>
+            </div>
+            <div class="form-group">
+                <label for="lastname">Last Name</label>
+                <input type="text" id="lastname" name="lastname" required>
+            </div>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+        
+            <div class="form-buttons">
+                <button type="submit" id="register-btn">Register</button>
+            </div>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="Login.html" style="color: white;">Already have an account? Login</a>
+        </div>
+    </div>
+    <script>
+        function onFormSubmit() {
+            const username = document.getElementById('usernameInput').value;
+            window.location.href = `fitlife.html?username=${encodeURIComponent(username)}`;
+        }
+    </script>
+</body>
+
+</html>
