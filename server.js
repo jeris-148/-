@@ -1,10 +1,11 @@
 const express = require('express');
-const mysql = require('mysql');
+const router = express.Router();
+const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const path = require('path');
 const app = express();
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 const session = require('express-session');
 app.use(session({
     secret: 'your-secret-key',  // מפתח סודי לשימוש ב-session
@@ -20,11 +21,14 @@ const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'root',
-    database: 'new_schema2'
+    database: 'jeris'
 });
 
 connection.connect((err) => {
-    if (err) throw err;
+    if (err) {
+        console.error('Error connecting to the database:', err);
+        process.exit(1); // סיום התהליך במקרה של שגיאה
+    }
     console.log('Connected to the database.');
 });
 
@@ -39,7 +43,7 @@ app.post('/db.js', (req, res) => {
     const password = req.body.password;
     const email = req.body.email;
 
-    const query = 'SELECT * FROM project2 WHERE username = ? AND password = ? AND email = ?';
+    const query = 'SELECT * FROM project WHERE username = ? AND password = ? AND email = ?';
     connection.query(query, [username, password, email], (err, results) => {
         if (err) throw err;
 
@@ -62,7 +66,7 @@ app.post('/auth/register', (req, res) => {
         const { firstName, lastName, username, email, password } = req.body;
     
         // בדיקת קיום שם המשתמש
-        const checkUserQuery = 'SELECT * FROM project2 WHERE username = ?';
+        const checkUserQuery = 'SELECT * FROM project WHERE username = ?';
         connection.query(checkUserQuery, [username], (err, results) => {
             if (err) {
                 console.error('Error checking username:', err);
@@ -74,7 +78,7 @@ app.post('/auth/register', (req, res) => {
                 return res.send('Username already exists');
             } else {
                 // אם שם המשתמש לא קיים, מבצעים את הרישום
-                const query = 'INSERT INTO project2 (firstName, lastName, username, email, password) VALUES (?, ?, ?, ?, ?)';
+                const query = 'INSERT INTO project (firstName, lastName, username, email, password) VALUES (?, ?, ?, ?, ?)';
                 connection.query(query, [firstName, lastName, username, email, password], (err, result) => {
                     if (err) {
                         console.error('Error registering user:', err);
@@ -96,7 +100,8 @@ app.post('/auth/register', (req, res) => {
             res.json({ username: req.session.username });
         }
     });
-            
+
+      
     app.post('/contact', (req, res) => {
         const { name, phone, message } = req.body;
     
@@ -114,16 +119,44 @@ app.post('/auth/register', (req, res) => {
     app.post('/feedback', (req, res) => {
         const { name, rating, message } = req.body;
     
-        const query = 'INSERT INTO feedback (name, rating, message) VALUES (?, ?, ?)';
-        connection.query(query, [name, rating, message], (err, result) => {
+        if (!name || !rating || !message) {
+            return res.status(400).send('All fields are required.');
+        }
+    
+        const sqlInsert = 'INSERT INTO feedback (name, rating, message) VALUES (?, ?, ?)';
+        connection.query(sqlInsert, [name, rating, message], (err) => {
             if (err) {
-                console.error('Error submitting feedback:', err);
-                return res.status(500).send('Error submitting feedback.');
+                console.error('Error saving feedback:', err);
+                return res.status(500).send('Error saving feedback.');
             }
     
-            res.send('Thank you for your feedback!');
+            // לאחר הכנסת הפידבק, שליפת כל הפידבקים
+            const sqlSelect = 'SELECT * FROM feedback ORDER BY created_at DESC';
+            connection.query(sqlSelect, (err, results) => {
+                if (err) {
+                    console.error('Error fetching feedbacks:', err);
+                    return res.status(500).send('Error fetching feedbacks.');
+                }
+    
+                // החזרת כל הפידבקים כתגובה
+                res.json(results);
+            });
         });
     });
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
-});     
+    
+    
+    app.get('/feedbacks', (req, res) => {
+        const sql = 'SELECT * FROM feedback ORDER BY created_at DESC'; // שליפה לפי תאריך יצירה
+        connection.query(sql, (err, results) => {
+            if (err) {
+                console.error('Error fetching feedbacks:', err);
+                return res.status(500).send('Error fetching feedbacks.');
+            }
+            res.json(results); // החזרת הפידבקים בפורמט JSON
+        });
+    });
+    
+    app.listen(3000, () => {
+        console.log('Server is running on port 3000');
+        });     
+    
