@@ -139,22 +139,17 @@ app.post('/auth/register', (req, res) => {
                 }
     
                 // החזרת כל הפידבקים כתגובה
-                res.json(results);
+                res.render('feedback.ejs',{feedbacks: results});
             });
         });
     });
     
     
-    app.get('/feedbacks', (req, res) => {
-        const sql = 'SELECT * FROM feedback ORDER BY created_at DESC'; // שליפה לפי תאריך יצירה
-        connection.query(sql, (err, results) => {
-            if (err) {
-                console.error('Error fetching feedbacks:', err);
-                return res.status(500).send('Error fetching feedbacks.');
-            }
-            res.json(results); // החזרת הפידבקים בפורמט JSON
-        });
-    });
+app.set('views', path.join(__dirname, 'views')); // הגדרת תיקיית views
+app.set('view engine', 'ejs'); // הגדרת מנוע התבניות EJS
+
+    
+    
     
     app.listen(3000, () => {
         console.log('Server is running on port 3000');
