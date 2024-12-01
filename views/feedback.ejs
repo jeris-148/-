@@ -112,25 +112,18 @@
                     <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px;">Reply</button>
                 </form>
 
-                <!-- כפתור מחיקת פידבק -->
-                <form action="/feedback/<%= feedback.id %>/delete" method="POST" style="margin-top: 10px;">
-                    <button type="submit" class="delete-button">Delete Feedback</button>
-                </form>
-            </div>
-        <% }); %>
-    </div>
-
+    <!-- כפתור עריכת פידבק -->
     <form action="/feedback/<%= feedback.id %>/edit" method="GET" style="margin-top: 10px;">
-        <button type="submit" style="
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        ">Edit</button>
+        <button type="submit" class="edit-button">Edit Feedback</button>
     </form>
+
+<!-- כפתור מחיקת פידבק -->
+<form action="/feedback/<%= feedback.id %>/delete" method="POST" style="margin-top: 10px;">
+    <button type="submit" class="delete-button">Delete Feedback</button>
+</form>
+</div>
+<% }); %>
+</div>
     
     <!-- סקריפט למחיקת תגובות ופידבקים -->
     <script>
