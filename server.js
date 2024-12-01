@@ -246,25 +246,32 @@ app.get('/feedback/:id/edit', (req, res) => {
             return res.status(404).send('Feedback not found.');
         }
 
-        res.render('edit-feedback', { feedback: results[0] });
+        const feedback = results[0];
+        res.render('edit-feedback', { feedback });
     });
 });
 
-
-app.put('/feedback/:id', (req, res) => {
+app.post('/feedback/:id', (req, res) => {
     const feedbackId = req.params.id;
-    const { name, message } = req.body;
+    const { name, message } = req.body; // קבלת ערכים מהטופס
 
-    const query = 'UPDATE feedback SET name = ?, rating = ?, message = ? WHERE id = ?';
-    connection.query(query, [name, message, feedbackId], (err, results) => {
+    console.log('Name:', name); // בדיקה האם שם מתקבל
+    console.log('Message:', message); // בדיקה האם הודעה מתקבלת
+
+    if (!name || !message) {
+        return res.status(400).send('Name and message are required');
+    }
+
+    const query = 'UPDATE feedback SET name = ?, message = ? WHERE id = ?';
+    connection.query(query, [name, message, feedbackId], (err) => {
         if (err) {
             console.error('Error updating feedback:', err);
-            return res.status(500).send('Error updating feedback.');
+            return res.status(500).send('Error updating feedback');
         }
-
         res.redirect('/feedbacks');
     });
 });
+
 
 
     
