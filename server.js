@@ -4,6 +4,9 @@ const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const path = require('path');
 const app = express();
+const methodOverride = require('method-override');
+
+app.use(methodOverride('_method'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 const session = require('express-session');
@@ -14,7 +17,6 @@ app.use(session({
 }));
 // משרת קבצים סטטיים מהתיקייה הנוכחית
 app.use(express.static(__dirname));
-
 
 // חיבור למסד נתונים 
 const connection = mysql.createConnection({
@@ -143,12 +145,131 @@ app.post('/auth/register', (req, res) => {
             });
         });
     });
+
+    app.post('/feedback/:id/reply', (req, res) => {
+        const feedbackId = req.params.id; // מזהה הפידבק
+        const { name, message } = req.body;
     
+        if (!name || !message) {
+            return res.status(400).send('Name and message are required.');
+        }
+    
+        const sql = 'INSERT INTO replies (feedback_id, name, message) VALUES (?, ?, ?)';
+        connection.query(sql, [feedbackId, name, message], (err) => {
+            if (err) {
+                console.error('Error saving reply:', err);
+                return res.status(500).send('Error saving reply.');
+            }
+    
+            res.redirect('/feedbacks'); // חזרה לעמוד הפידבקים
+        });
+    });
+
+    app.get('/feedbacks', (req, res) => {
+    const feedbackSql = 'SELECT * FROM feedback ORDER BY created_at DESC';
+    const replySql = 'SELECT * FROM replies ORDER BY created_at ASC';
+
+    connection.query(feedbackSql, (err, feedbacks) => {
+        if (err) {
+            console.error('Error fetching feedbacks:', err);
+            return res.status(500).send('Error fetching feedbacks.');
+        }
+
+        connection.query(replySql, (err, replies) => {
+            if (err) {
+                console.error('Error fetching replies:', err);
+                return res.status(500).send('Error fetching replies.');
+            }
+
+            // סידור התגובות לפי פידבקים
+            const feedbackWithReplies = feedbacks.map((feedback) => {
+                feedback.replies = replies.filter(reply => reply.feedback_id === feedback.id);
+                return feedback;
+            });
+
+            res.render('feedback', { feedbacks: feedbackWithReplies });
+        });
+    });
+});
+
+app.get('/feedbacks', (req, res) => {
+    const sqlSelect = 'SELECT * FROM feedback ORDER BY created_at DESC';
+    connection.query(sqlSelect, (err, feedbacks) => {
+        if (err) {
+            console.error('Error fetching feedbacks:', err);
+            return res.status(500).send('Error fetching feedbacks.');
+        }
+
+        // העברת נתונים לתבנית
+        res.render('feedback', { feedbacks });
+    });
+});
+app.post('/feedback/:id/delete', (req, res) => {
+    const feedbackId = req.params.id;
+
+    const deleteQuery = 'DELETE FROM feedback WHERE id = ?';
+    connection.query(deleteQuery, [feedbackId], (err, result) => {
+        if (err) {
+            console.error('Error deleting feedback:', err);
+            return res.status(500).send('Error deleting feedback.');
+        }
+
+        console.log(`Feedback with ID ${feedbackId} deleted.`);
+        res.redirect('/feedbacks'); // הפניה חזרה לעמוד הפידבקים
+    });
+});
+
+app.post('/feedback/:feedbackId/reply/:replyId/delete', (req, res) => {
+    const { feedbackId, replyId } = req.params;
+
+    const deleteReplyQuery = 'DELETE FROM replies WHERE id = ? AND feedback_id = ?';
+    connection.query(deleteReplyQuery, [replyId, feedbackId], (err, result) => {
+        if (err) {
+            console.error('Error deleting reply:', err);
+            return res.status(500).send('Error deleting reply.');
+        }
+        res.redirect('/feedbacks'); // עדכון העמוד לאחר המחיקה
+    });
+});
+
+app.get('/feedback/:id/edit', (req, res) => {
+    const feedbackId = req.params.id;
+
+    const query = 'SELECT * FROM feedback WHERE id = ?';
+    connection.query(query, [feedbackId], (err, results) => {
+        if (err) {
+            console.error('Error fetching feedback for edit:', err);
+            return res.status(500).send('Error fetching feedback.');
+        }
+
+        if (results.length === 0) {
+            return res.status(404).send('Feedback not found.');
+        }
+
+        res.render('edit-feedback', { feedback: results[0] });
+    });
+});
+
+
+app.put('/feedback/:id', (req, res) => {
+    const feedbackId = req.params.id;
+    const { name, message } = req.body;
+
+    const query = 'UPDATE feedback SET name = ?, rating = ?, message = ? WHERE id = ?';
+    connection.query(query, [name, message, feedbackId], (err, results) => {
+        if (err) {
+            console.error('Error updating feedback:', err);
+            return res.status(500).send('Error updating feedback.');
+        }
+
+        res.redirect('/feedbacks');
+    });
+});
+
+
     
 app.set('views', path.join(__dirname, 'views')); // הגדרת תיקיית views
 app.set('view engine', 'ejs'); // הגדרת מנוע התבניות EJS
-
-    
     
     
     app.listen(3000, () => {
