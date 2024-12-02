@@ -77,6 +77,8 @@
                 <p><%= feedback.message %></p>
                 <small>Submitted on: <%= new Date(feedback.created_at).toLocaleString() %></small>
 
+                
+                
                 <!-- הצגת תגובות -->
                 <div style="margin-top: 20px; padding-left: 20px;">
                     <h5>Replies:</h5>
@@ -85,6 +87,16 @@
                             <div style="margin-bottom: 10px;">
                                 <strong><%= reply.name %></strong>: <%= reply.message %>
                                 <small style="color: #aaa;">(<%= new Date(reply.created_at).toLocaleString() %>)</small>
+                                
+               <!-- כפתור עריכת פידבק -->
+               <form action="/feedback/<%= feedback.id %>/edit" method="GET" style="margin-top: 10px;">
+                <button type="submit" class="edit-button">Edit Feedback</button>
+            </form>
+                                <!-- כפתור עריכת Reply -->
+                                <form action="/feedback/<%= feedback.id %>/reply/<%= reply.id %>/edit" method="GET" style="margin-top: 5px;">
+                                    <button type="submit" class="edit-button">Edit Reply</button>
+                                    
+                                </form>
                                 
                                 <!-- כפתור מחיקת Reply -->
                                 <form action="/feedback/<%= feedback.id %>/reply/<%= reply.id %>/delete" method="POST" style="margin-top: 5px;">
@@ -112,19 +124,19 @@
                     <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px;">Reply</button>
                 </form>
 
-    <!-- כפתור עריכת פידבק -->
-    <form action="/feedback/<%= feedback.id %>/edit" method="GET" style="margin-top: 10px;">
-        <button type="submit" class="edit-button">Edit Feedback</button>
-    </form>
+                <!-- כפתור עריכת פידבק -->
+                <form action="/feedback/<%= feedback.id %>/edit" method="GET" style="margin-top: 10px;">
+                    <button type="submit" class="edit-button">Edit Feedback</button>
+                </form>
 
-<!-- כפתור מחיקת פידבק -->
-<form action="/feedback/<%= feedback.id %>/delete" method="POST" style="margin-top: 10px;">
-    <button type="submit" class="delete-button">Delete Feedback</button>
-</form>
-</div>
-<% }); %>
-</div>
-    
+                <!-- כפתור מחיקת פידבק -->
+                <form action="/feedback/<%= feedback.id %>/delete" method="POST" style="margin-top: 10px;">
+                    <button type="submit" class="delete-button">Delete Feedback</button>
+                </form>
+            </div>
+        <% }); %>
+    </div>
+
     <!-- סקריפט למחיקת תגובות ופידבקים -->
     <script>
         document.querySelectorAll('form[action*="/delete"]').forEach(form => {
@@ -136,7 +148,6 @@
             });
         });
     </script>
-
 
     <!-- Back to Home Button -->
     <div style="text-align: center; margin-top: 20px;">
