@@ -274,6 +274,53 @@ app.post('/feedback/:id', (req, res) => {
 
 
 
+app.get('/feedback/:feedbackId/reply/:replyId/edit', (req, res) => {
+    const feedbackId = req.params.feedbackId;
+    const replyId = req.params.replyId;
+
+    const query = 'SELECT * FROM replies WHERE id = ? AND feedback_id = ?';
+    connection.query(query, [replyId, feedbackId], (err, results) => {
+        if (err) {
+            console.error('Error fetching reply for edit:', err);
+            return res.status(500).send('Error fetching reply.');
+        }
+
+        if (results.length === 0) {
+            return res.status(404).send('Reply not found.');
+        }
+
+        const reply = results[0];
+        res.render('edit-reply', { reply, feedbackId });
+    });
+});
+
+
+app.post('/feedback/:feedbackId/reply/:replyId', (req, res) => {
+    const feedbackId = req.params.feedbackId; // מזהה הפידבק
+    const replyId = req.params.replyId; // מזהה התגובה
+    const { name, message } = req.body; // הנתונים החדשים מהטופס
+
+    connection.query(
+        'UPDATE replies SET name = ?, message = ? WHERE id = ? AND feedback_id = ?',
+        [name, message, replyId, feedbackId],
+        (err, results) => {
+            if (err) {
+                console.error('Error updating reply:', err);
+                return res.status(500).send('Error updating reply');
+            }
+
+            if (results.affectedRows === 0) {
+                return res.status(404).send('Reply not found or no changes made');
+            }
+
+            res.redirect(`/feedback/${feedbackId}`); // חזרה לעמוד הפידבק
+        }
+    );
+});
+
+
+
+
     
 app.set('views', path.join(__dirname, 'views')); // הגדרת תיקיית views
 app.set('view engine', 'ejs'); // הגדרת מנוע התבניות EJS
