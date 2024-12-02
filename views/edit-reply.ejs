@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Reply</title>
+</head>
+<body>
+    <h1>Edit Reply</h1>
+    <form action="/feedback/<%= feedbackId %>/reply/<%= reply.id %>" method="POST">
+        <label for="name">Your Name:</label><br>
+        <input type="text" id="name" name="name" value="<%= reply.name %>" required><br><br>
+        <label for="message">Your Reply:</label><br>
+        <textarea id="message" name="message" rows="4" required><%= reply.message %></textarea><br><br>
+        <button type="submit">Save Changes</button>
+    </form>
+    <a href="/feedback/<%= feedbackId %>">Back to Feedback</a>
+</body>
+</html>
