@@ -316,8 +316,35 @@ app.post('/feedback/:feedbackId/reply/:replyId', (req, res) => {
 
 
 
+app.get('/blogs', (req, res) => {
+    const query = 'SELECT * FROM blogs ORDER BY created_at DESC';
+    connection.query(query, (err, results) => {
+        if (err) {
+            console.error('Error inserting blog:', err);
+            return res.status(500).send('Error inserting blog.');
+        }
 
+        res.render('blogs', { blogs: results });
+    });
+});
 
+app.post('/add-blog', (req, res) => {
+    const { title, content } = req.body;
+
+    if (!title || !content) {
+        return res.status(400).send('נדרשים כותרת ותוכן.');
+    }
+
+    const query = 'INSERT INTO blogs (title, content) VALUES (?, ?)';
+    connection.query(query, [title, content], (err) => {
+        if (err) {
+            console.error('שגיאה בהוספת הבלוג:', err);
+            return res.status(500).send('שגיאה בהוספת הבלוג.');
+        }
+
+        res.redirect('/blogs'); // הפניה לרשימת הבלוגים לאחר ההוספה
+    });
+});
     
 app.set('views', path.join(__dirname, 'views')); // הגדרת תיקיית views
 app.set('view engine', 'ejs'); // הגדרת מנוע התבניות EJS
