@@ -53,7 +53,7 @@ app.post('/db.js', (req, res) => {
             // אם ההתחברות מוצלחת, נשמור את שם המשתמש ב-session
             req.session.username = username;
             console.log('Login OK');
-            res.redirect('/index.html'); // הפניה לדף index1.html
+            res.redirect('/index.html'); // הפניה לדף index.html
         } else {
             console.log('Login failed');
             res.send('Invalid username, password, or email.');
@@ -118,21 +118,26 @@ app.post('/auth/register', (req, res) => {
             res.send('Thank you for contacting us! We will get back to you soon.');
         });
     });
+
+
     app.post('/feedback', (req, res) => {
-        const { name, rating, message } = req.body;
+        const { rating, message } = req.body; // קבלת הדירוג וההודעה מהטופס
+        const username = req.session.username; // קבלת שם המשתמש מתוך ה-Session
     
-        if (!name || !rating || !message) {
+        // בדיקה אם כל השדות נמסרו
+        if (!username || !rating || !message) {
             return res.status(400).send('All fields are required.');
         }
     
-        const sqlInsert = 'INSERT INTO feedback (name, rating, message) VALUES (?, ?, ?)';
-        connection.query(sqlInsert, [name, rating, message], (err) => {
+        // הוספת הפידבק למסד הנתונים
+        const sqlInsert = 'INSERT INTO feedback (username, rating, message) VALUES (?, ?, ?)';
+        connection.query(sqlInsert, [username, rating, message], (err) => {
             if (err) {
                 console.error('Error saving feedback:', err);
                 return res.status(500).send('Error saving feedback.');
             }
     
-            // לאחר הכנסת הפידבק, שליפת כל הפידבקים
+            // שליפת כל הפידבקים לאחר הכנסת הפידבק החדש
             const sqlSelect = 'SELECT * FROM feedback ORDER BY created_at DESC';
             connection.query(sqlSelect, (err, results) => {
                 if (err) {
@@ -140,22 +145,23 @@ app.post('/auth/register', (req, res) => {
                     return res.status(500).send('Error fetching feedbacks.');
                 }
     
-                // החזרת כל הפידבקים כתגובה
-                res.render('feedback.ejs',{feedbacks: results});
+                // שליחה של הפידבקים לעמוד EJS
+                res.render('feedback.ejs', { feedbacks: results, username }); // הוספת username ל-EJS
             });
         });
     });
+    
 
     app.post('/feedback/:id/reply', (req, res) => {
         const feedbackId = req.params.id; // מזהה הפידבק
-        const { name, message } = req.body;
+        const { username, message } = req.body;
     
-        if (!name || !message) {
+        if (!username || !message) {
             return res.status(400).send('Name and message are required.');
         }
     
-        const sql = 'INSERT INTO replies (feedback_id, name, message) VALUES (?, ?, ?)';
-        connection.query(sql, [feedbackId, name, message], (err) => {
+        const sql = 'INSERT INTO replies (feedback_id, username, message) VALUES (?, ?, ?)';
+        connection.query(sql, [feedbackId, username, message], (err) => {
             if (err) {
                 console.error('Error saving reply:', err);
                 return res.status(500).send('Error saving reply.');
@@ -255,15 +261,15 @@ app.post('/feedback/:id', (req, res) => {
     const feedbackId = req.params.id;
     const { name, message } = req.body; // קבלת ערכים מהטופס
 
-    console.log('Name:', name); // בדיקה האם שם מתקבל
+    console.log('Name:', username); // בדיקה האם שם מתקבל
     console.log('Message:', message); // בדיקה האם הודעה מתקבלת
 
-    if (!name || !message) {
+    if (!username || !message) {
         return res.status(400).send('Name and message are required');
     }
 
-    const query = 'UPDATE feedback SET name = ?, message = ? WHERE id = ?';
-    connection.query(query, [name, message, feedbackId], (err) => {
+    const query = 'UPDATE feedback SET username = ?, message = ? WHERE id = ?';
+    connection.query(query, [username, message, feedbackId], (err) => {
         if (err) {
             console.error('Error updating feedback:', err);
             return res.status(500).send('Error updating feedback');
@@ -300,9 +306,9 @@ app.get('/feedback/:feedbackId/reply/:replyId/edit', (req, res) => {
 app.post('/feedback/:feedbackId/reply/:replyId', (req, res) => {
     const feedbackId = req.params.feedbackId; // מזהה הפידבק
     const replyId = req.params.replyId; // מזהה התגובה
-    const { name, message } = req.body; // הנתונים שהוזנו בטופס
-    const query ='UPDATE replies SET name = ?, message = ? WHERE id = ? AND feedback_id = ?'
-    connection.query(query, [name, message, replyId, feedbackId],
+    const { username, message } = req.body; // הנתונים שהוזנו בטופס
+    const query ='UPDATE replies SET username = ?, message = ? WHERE id = ? AND feedback_id = ?'
+    connection.query(query, [username, message, replyId, feedbackId],
         (err, results) => {
             if (err) {
                 console.error('Error updating reply:', err);
