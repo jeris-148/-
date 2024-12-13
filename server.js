@@ -210,39 +210,91 @@ app.get('/feedbacks', (req, res) => {
         res.render('feedback', { feedbacks });
     });
 });
+
+
 app.post('/feedback/:id/delete', (req, res) => {
     const feedbackId = req.params.id;
+    const currentUsername = req.session.username; // שם המשתמש המחובר כרגע
 
-    const deleteQuery = 'DELETE FROM feedback WHERE id = ?';
-    connection.query(deleteQuery, [feedbackId], (err, result) => {
+    // שליפת הפידבק כדי לוודא שהוא שייך למשתמש הנוכחי
+    const fetchFeedbackQuery = 'SELECT * FROM feedback WHERE id = ?';
+    connection.query(fetchFeedbackQuery, [feedbackId], (err, results) => {
         if (err) {
-            console.error('Error deleting feedback:', err);
-            return res.status(500).send('Error deleting feedback.');
+            console.error('Error fetching feedback:', err);
+            return res.status(500).send('Error fetching feedback.');
         }
 
-        console.log(`Feedback with ID ${feedbackId} deleted.`);
-        res.redirect('/feedbacks'); // הפניה חזרה לעמוד הפידבקים
+        if (results.length === 0) {
+            return res.status(404).send('Feedback not found.');
+        }
+
+        const feedback = results[0];
+
+        // בדיקת בעלות
+        if (feedback.username !== currentUsername) {
+            return res.status(403).send('You are not allowed to delete this feedback.');
+        }
+
+        // מחיקת הפידבק
+        const deleteQuery = 'DELETE FROM feedback WHERE id = ?';
+        connection.query(deleteQuery, [feedbackId], (err) => {
+            if (err) {
+                console.error('Error deleting feedback:', err);
+                return res.status(500).send('Error deleting feedback.');
+            }
+
+            res.redirect('/feedbacks'); // חזרה לרשימת הפידבקים
+        });
     });
 });
+
+
 
 app.post('/feedback/:feedbackId/reply/:replyId/delete', (req, res) => {
-    const { feedbackId, replyId } = req.params;
+    const feedbackId = req.params.feedbackId; // מזהה הפידבק
+    const replyId = req.params.replyId; // מזהה התגובה
+    const currentUsername = req.session.username; // שם המשתמש המחובר כרגע
 
-    const deleteReplyQuery = 'DELETE FROM replies WHERE id = ? AND feedback_id = ?';
-    connection.query(deleteReplyQuery, [replyId, feedbackId], (err, result) => {
+    // שליפת התגובה ממסד הנתונים כדי לבדוק את בעלות המשתמש
+    const query = 'SELECT * FROM replies WHERE id = ? AND feedback_id = ?';
+    connection.query(query, [replyId, feedbackId], (err, results) => {
         if (err) {
-            console.error('Error deleting reply:', err);
-            return res.status(500).send('Error deleting reply.');
+            console.error('Error fetching reply for delete:', err);
+            return res.status(500).send('Error fetching reply.');
         }
-        res.redirect('/feedbacks'); // עדכון העמוד לאחר המחיקה
+
+        if (results.length === 0) {
+            return res.status(404).send('Reply not found.');
+        }
+
+        const reply = results[0];
+
+        // בדיקת בעלות
+        if (reply.username !== currentUsername) {
+            return res.status(403).send('You are not allowed to delete this reply.');
+        }
+
+        // מחיקת התגובה אם המשתמש הוא הבעלים
+        const deleteQuery = 'DELETE FROM replies WHERE id = ? AND feedback_id = ?';
+        connection.query(deleteQuery, [replyId, feedbackId], (err) => {
+            if (err) {
+                console.error('Error deleting reply:', err);
+                return res.status(500).send('Error deleting reply.');
+            }
+
+            res.redirect('/feedbacks'); // חזרה לעמוד הפידבקים
+        });
     });
 });
+
+
 
 app.get('/feedback/:id/edit', (req, res) => {
     const feedbackId = req.params.id;
-    const username = req.session.username;
+    const currentUsername = req.session.username;
     const query = 'SELECT * FROM feedback WHERE id = ?';
-    connection.query(query, [feedbackId,username], (err, results) => {
+    connection.query(query, [feedbackId], (err, results) => {
+
         if (err) {
             console.error('Error fetching feedback for edit:', err);
             return res.status(500).send('Error fetching feedback.');
@@ -253,77 +305,118 @@ app.get('/feedback/:id/edit', (req, res) => {
         }
 
         const feedback = results[0];
-        res.render('edit-feedback', { feedback, username: req.session.username });
+
+        if (feedback.username !== currentUsername) {
+            return res.status(403).send('You are not allowed to edit this feedback.');
+        }
+
+        res.render('edit-feedback', { feedback, username: currentUsername });
     });
 });
 
 app.post('/feedback/:id', (req, res) => {
     const feedbackId = req.params.id;
     const { message } = req.body; // קבלת ערכים מהטופס
-    const username = req.session.username;
-    console.log('Name:', username); // בדיקה האם שם מתקבל
+    const currentUsername = req.session.username;
+    console.log('Name:', currentUsername); // בדיקה האם שם מתקבל
     console.log('Message:', message); // בדיקה האם הודעה מתקבלת
 
     if (!message) {
         return res.status(400).send(' message is required');
     }
 
-    const query = 'UPDATE feedback SET message = ? WHERE id = ? AND username = ?';
-    connection.query(query, [message, feedbackId, username], (err, results) => {
+    const checkQuery = 'SELECT * FROM feedback WHERE id = ? AND username = ?';
+    connection.query(checkQuery, [feedbackId, currentUsername], (err, results) => {
         if (err) {
-            console.error('Error updating feedback:', err);
-            return res.status(500).send('Error updating feedback.');
+            console.error('Error verifying feedback ownership:', err);
+            return res.status(500).send('Error verifying feedback ownership.');
         }
 
-        if (results.affectedRows === 0) {
-            return res.status(403).send('You are not authorized to edit this feedback.');
+        if (results.length === 0) {
+            return res.status(403).send('You are not allowed to edit this feedback.');
         }
 
-        res.redirect('/feedbacks');
+        // עדכון הפידבק
+        const updateQuery = 'UPDATE feedback SET message = ? WHERE id = ?';
+        connection.query(updateQuery, [message, feedbackId], (err) => {
+            if (err) {
+                console.error('Error updating feedback:', err);
+                return res.status(500).send('Error updating feedback.');
+            }
+            res.redirect('/feedbacks'); // חזרה לעמוד הפידבקים
+        });
     });
 });
 
 
 
 app.get('/feedback/:feedbackId/reply/:replyId/edit', (req, res) => {
-    const feedbackId = req.params.feedbackId;
-    const replyId = req.params.replyId;
-    const query ='SELECT * FROM replies WHERE id = ? AND feedback_id = ?';
+    const feedbackId = req.params.feedbackId; // מזהה הפידבק
+    const replyId = req.params.replyId; // מזהה התגובה
+    const currentUsername = req.session.username; // שם המשתמש המחובר כרגע
 
+    const query = 'SELECT * FROM replies WHERE id = ? AND feedback_id = ?';
     connection.query(query, [replyId, feedbackId], (err, results) => {
-            if (err) {
-                console.error('Error fetching reply for edit:', err);
-                return res.status(500).send('Error fetching reply.');
-            }
-
-            if (results.length === 0) {
-                return res.status(404).send('Reply not found.');
-            }
-
-            const reply = results[0];
-            res.render('edit-reply', {feedbackId, reply, username: req.session.username });
+        if (err) {
+            console.error('Error fetching reply for edit:', err);
+            return res.status(500).send('Error fetching reply.');
         }
-    );
+
+        if (results.length === 0) {
+            return res.status(404).send('Reply not found.');
+        }
+
+        const reply = results[0];
+
+        // בדיקת בעלות: האם המשתמש הנוכחי הוא היוצר של התגובה
+        if (reply.username !== currentUsername) {
+            return res.status(403).send('You are not allowed to edit this reply.');
+        }
+
+        res.render('edit-reply', { feedbackId, reply, username: currentUsername });
+    });
 });
+
+
 
 
 
 app.post('/feedback/:feedbackId/reply/:replyId', (req, res) => {
     const feedbackId = req.params.feedbackId; // מזהה הפידבק
     const replyId = req.params.replyId; // מזהה התגובה
-    const { username, message } = req.body; // הנתונים שהוזנו בטופס
-    const query ='UPDATE replies SET username = ?, message = ? WHERE id = ? AND feedback_id = ?'
-    connection.query(query, [username, message, replyId, feedbackId],
-        (err, results) => {
+    const currentUsername = req.session.username; // שם המשתמש המחובר כרגע
+    const { message } = req.body; // התוכן החדש של התגובה
+
+    const selectQuery = 'SELECT * FROM replies WHERE id = ? AND feedback_id = ?';
+    connection.query(selectQuery, [replyId, feedbackId], (err, results) => {
+        if (err) {
+            console.error('Error fetching reply for update:', err);
+            return res.status(500).send('Error fetching reply.');
+        }
+
+        if (results.length === 0) {
+            return res.status(404).send('Reply not found.');
+        }
+
+        const reply = results[0];
+
+        // בדיקת בעלות
+        if (reply.username !== currentUsername) {
+            return res.status(403).send('You are not allowed to edit this reply.');
+        }
+
+        const updateQuery = 'UPDATE replies SET message = ? WHERE id = ? AND feedback_id = ?';
+        connection.query(updateQuery, [message, replyId, feedbackId], (err) => {
             if (err) {
                 console.error('Error updating reply:', err);
                 return res.status(500).send('Error updating reply.');
             }
 
-            res.redirect('/feedbacks'); // חזרה לעמוד הפידבק
-        }
-    );
+            res.redirect(`/feedbacks`);
+        });
+    });
 });
+
 
 
 
