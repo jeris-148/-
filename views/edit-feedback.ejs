@@ -45,12 +45,10 @@
 <body>
     <h1 style="text-align: center;">Edit Feedback</h1>
     <form action="/feedback/<%= feedback.id %>" method="POST">
-        <label for="name">Your Name:</label>
-        <input type="text" id="name" name="name" value="<%= feedback.name %>" required>
 
+        <input type="hidden" name="username" value="<%= username %>">
         <label for="message">Your Feedback:</label>
-        <textarea id="message" name="message" rows="4" required><%= feedback.message %></textarea>
-
+        <textarea id="message" name="message" rows="4" required><%= feedback.message %></textarea><br><br>
         <button type="submit">Save Changes</button>
     </form>
 </body>
