@@ -193,7 +193,7 @@ app.post('/auth/register', (req, res) => {
                 return feedback;
             });
 
-            res.render('feedback', { feedbacks: feedbackWithReplies });
+            res.render('feedback', { feedbacks: feedbackWithReplies, username: req.session.username });
         });
     });
 });
@@ -296,7 +296,7 @@ app.get('/feedback/:feedbackId/reply/:replyId/edit', (req, res) => {
             }
 
             const reply = results[0];
-            res.render('edit-reply', { feedbackId, reply });
+            res.render('edit-reply', {feedbackId, reply });
         }
     );
 });
