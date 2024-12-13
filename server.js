@@ -307,12 +307,18 @@ app.get('/feedback/:id/edit', (req, res) => {
         const feedback = results[0];
 
         if (feedback.username !== currentUsername) {
-            return res.status(403).send('You are not allowed to edit this feedback.');
+            return res.render('error', { 
+                title: 'Edit Feedback Error',
+                message: 'You are not allowed to edit this feedback.', 
+                redirectUrl: '/feedbacks' 
+            });
         }
 
         res.render('edit-feedback', { feedback, username: currentUsername });
     });
 });
+
+
 
 app.post('/feedback/:id', (req, res) => {
     const feedbackId = req.params.id;
@@ -368,9 +374,12 @@ app.get('/feedback/:feedbackId/reply/:replyId/edit', (req, res) => {
 
         const reply = results[0];
 
-        // בדיקת בעלות: האם המשתמש הנוכחי הוא היוצר של התגובה
         if (reply.username !== currentUsername) {
-            return res.status(403).send('You are not allowed to edit this reply.');
+            return res.render('error', { 
+                title: 'Edit Reply Error',
+                message: 'You are not allowed to edit this reply.', 
+                redirectUrl: '/feedbacks' 
+            });
         }
 
         res.render('edit-reply', { feedbackId, reply, username: currentUsername });
