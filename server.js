@@ -240,9 +240,9 @@ app.post('/feedback/:feedbackId/reply/:replyId/delete', (req, res) => {
 
 app.get('/feedback/:id/edit', (req, res) => {
     const feedbackId = req.params.id;
-
+    const username = req.session.username;
     const query = 'SELECT * FROM feedback WHERE id = ?';
-    connection.query(query, [feedbackId], (err, results) => {
+    connection.query(query, [feedbackId,username], (err, results) => {
         if (err) {
             console.error('Error fetching feedback for edit:', err);
             return res.status(500).send('Error fetching feedback.');
@@ -259,21 +259,26 @@ app.get('/feedback/:id/edit', (req, res) => {
 
 app.post('/feedback/:id', (req, res) => {
     const feedbackId = req.params.id;
-    const { name, message } = req.body; // קבלת ערכים מהטופס
+    const { message } = req.body; // קבלת ערכים מהטופס
     const username = req.session.username;
     console.log('Name:', username); // בדיקה האם שם מתקבל
     console.log('Message:', message); // בדיקה האם הודעה מתקבלת
 
-    if (!username || !message) {
-        return res.status(400).send('Name and message are required');
+    if (!message) {
+        return res.status(400).send(' message is required');
     }
 
-    const query = 'UPDATE feedback SET username = ?, message = ? WHERE id = ?';
-    connection.query(query, [username, message, feedbackId], (err) => {
+    const query = 'UPDATE feedback SET message = ? WHERE id = ? AND username = ?';
+    connection.query(query, [message, feedbackId, username], (err, results) => {
         if (err) {
             console.error('Error updating feedback:', err);
-            return res.status(500).send('Error updating feedback');
+            return res.status(500).send('Error updating feedback.');
         }
+
+        if (results.affectedRows === 0) {
+            return res.status(403).send('You are not authorized to edit this feedback.');
+        }
+
         res.redirect('/feedbacks');
     });
 });
