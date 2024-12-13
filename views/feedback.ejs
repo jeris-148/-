@@ -68,11 +68,14 @@
     </style>
 </head>
 <body>
-    <h1 style="text-align: center;">User Feedback</h1>
+    <h1 style="text-align: center;">Your Feedback, Our Growth</h1>
+    <p style="text-align: center; font-size: 18px;">
+        Welcome, <strong><%= username %></strong>! <!-- הצגת שם המשתמש -->
+    </p>
     <div class="feedback-container">
         <% feedbacks.forEach(function(feedback) { %>
             <div class="feedback-card">
-                <h4><%= feedback.name %></h4>
+                <h4><%= feedback.username %></h4>
                 <p><strong>Rating:</strong> <%= feedback.rating %> / 5</p>
                 <p><%= feedback.message %></p>
                 <small>Submitted on: <%= new Date(feedback.created_at).toLocaleString() %></small>
@@ -85,19 +88,22 @@
                     <% if (feedback.replies && feedback.replies.length > 0) { %>
                         <% feedback.replies.forEach(function(reply) { %>
                             <div style="margin-bottom: 10px;">
-                                <strong><%= reply.name %></strong>: <%= reply.message %>
+                                <strong><%= reply.username %></strong>: <%= reply.message %>
                                 <small style="color: #aaa;">(<%= new Date(reply.created_at).toLocaleString() %>)</small>
                                 
-               <!-- כפתור עריכת פידבק -->
-               <form action="/feedback/<%= feedback.id %>/edit" method="GET" style="margin-top: 10px;">
-                <button type="submit" class="edit-button">Edit Feedback</button>
-            </form>
-                                <!-- כפתור עריכת Reply -->
-                                <form action="/feedback/<%= feedback.id %>/reply/<%= reply.id %>/edit" method="GET" style="margin-top: 5px;">
-                                    <button type="submit" class="edit-button">Edit Reply</button>
-                                    
-                                </form>
-                                
+                              <!-- כפתור עריכת Reply -->
+<form action="/feedback/<%= feedback.id %>/reply/<%= reply.id %>/edit" method="GET" style="margin-top: 5px;">
+    <button type="submit" style="
+        padding: 5px 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+    ">Edit Reply</button>
+</form>
+
                                 <!-- כפתור מחיקת Reply -->
                                 <form action="/feedback/<%= feedback.id %>/reply/<%= reply.id %>/delete" method="POST" style="margin-top: 5px;">
                                     <button type="submit" style="
@@ -119,8 +125,8 @@
 
                 <!-- טופס להוספת תגובה -->
                 <form action="/feedback/<%= feedback.id %>/reply" method="POST" style="margin-top: 20px;">
-                    <input type="text" name="name" placeholder="Your name" required style="width: 100%; margin-bottom: 10px;">
                     <textarea name="message" placeholder="Write your reply" rows="2" required style="width: 100%; margin-bottom: 10px;"></textarea>
+                    <input type="hidden" name="username" value="<%= username %>"> <!-- הוספת השם באופן אוטומטי -->
                     <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px;">Reply</button>
                 </form>
 
