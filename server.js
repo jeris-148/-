@@ -253,14 +253,14 @@ app.get('/feedback/:id/edit', (req, res) => {
         }
 
         const feedback = results[0];
-        res.render('edit-feedback', { feedback });
+        res.render('edit-feedback', { feedback, username: req.session.username });
     });
 });
 
 app.post('/feedback/:id', (req, res) => {
     const feedbackId = req.params.id;
     const { name, message } = req.body; // קבלת ערכים מהטופס
-
+    const username = req.session.username;
     console.log('Name:', username); // בדיקה האם שם מתקבל
     console.log('Message:', message); // בדיקה האם הודעה מתקבלת
 
@@ -296,7 +296,7 @@ app.get('/feedback/:feedbackId/reply/:replyId/edit', (req, res) => {
             }
 
             const reply = results[0];
-            res.render('edit-reply', {feedbackId, reply });
+            res.render('edit-reply', {feedbackId, reply, username: req.session.username });
         }
     );
 });
