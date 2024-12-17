@@ -153,15 +153,23 @@ app.post('/auth/register', (req, res) => {
     
 
     app.post('/feedback/:id/reply', (req, res) => {
-        const feedbackId = req.params.id; // מזהה הפידבק
+        const feedbackId = req.params.id;
         const { username, message } = req.body;
     
         if (!username || !message) {
-            return res.status(400).send('Name and message are required.');
+            return res.status(400).send('Username and message are required.');
         }
     
-        const sql = 'INSERT INTO replies (feedback_id, username, message) VALUES (?, ?, ?)';
-        connection.query(sql, [feedbackId, username, message], (err) => {
+        // חיפוש תיוג בהודעה
+        let taggedUser = null;
+        const tagMatch = message.match(/@(\w+)/); // חיפוש התיוג הראשון
+        if (tagMatch && tagMatch[1]) { // בדיקה אם נמצא תיוג תקין
+            taggedUser = tagMatch[1];
+        }
+    
+        // הוספת התגובה למסד הנתונים
+        const sql = 'INSERT INTO replies (feedback_id, username, message, tagged_user) VALUES (?, ?, ?, ?)';
+        connection.query(sql, [feedbackId, username, message, taggedUser || null], (err) => {
             if (err) {
                 console.error('Error saving reply:', err);
                 return res.status(500).send('Error saving reply.');
@@ -170,6 +178,8 @@ app.post('/auth/register', (req, res) => {
             res.redirect('/feedbacks'); // חזרה לעמוד הפידבקים
         });
     });
+    
+    
 
     app.get('/feedbacks', (req, res) => {
     const feedbackSql = 'SELECT * FROM feedback ORDER BY created_at DESC';
