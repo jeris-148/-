@@ -225,14 +225,22 @@ app.post('/feedback/:id/delete', (req, res) => {
         }
 
         if (results.length === 0) {
-            return res.status(404).send('Feedback not found.');
+            return res.status(404).render('error', {
+                title: 'Error',
+                message: 'Feedback not found.',
+                redirectUrl: '/feedbacks'
+            });
         }
 
         const feedback = results[0];
 
         // בדיקת בעלות
         if (feedback.username !== currentUsername) {
-            return res.status(403).send('You are not allowed to delete this feedback.');
+            return res.status(403).render('error', {
+                title: 'Permission Denied',
+                message: 'You are not allowed to delete this feedback.',
+                redirectUrl: '/feedbacks'
+            });
         }
 
         // מחיקת הפידבק
@@ -240,7 +248,11 @@ app.post('/feedback/:id/delete', (req, res) => {
         connection.query(deleteQuery, [feedbackId], (err) => {
             if (err) {
                 console.error('Error deleting feedback:', err);
-                return res.status(500).send('Error deleting feedback.');
+                return res.status(500).render('error', {
+                    title: 'Error Deleting',
+                    message: 'Error deleting feedback.',
+                    redirectUrl: '/feedbacks'
+                });
             }
 
             res.redirect('/feedbacks'); // חזרה לרשימת הפידבקים
@@ -251,41 +263,52 @@ app.post('/feedback/:id/delete', (req, res) => {
 
 
 app.post('/feedback/:feedbackId/reply/:replyId/delete', (req, res) => {
-    const feedbackId = req.params.feedbackId; // מזהה הפידבק
-    const replyId = req.params.replyId; // מזהה התגובה
-    const currentUsername = req.session.username; // שם המשתמש המחובר כרגע
+    const { feedbackId, replyId } = req.params;
+    const currentUsername = req.session.username; // המשתמש המחובר כרגע
 
-    // שליפת התגובה ממסד הנתונים כדי לבדוק את בעלות המשתמש
-    const query = 'SELECT * FROM replies WHERE id = ? AND feedback_id = ?';
-    connection.query(query, [replyId, feedbackId], (err, results) => {
+    // שליפת התגובה כדי לוודא שהיא שייכת למשתמש הנוכחי
+    const fetchReplyQuery = 'SELECT * FROM replies WHERE id = ? AND feedback_id = ?';
+    connection.query(fetchReplyQuery, [replyId, feedbackId], (err, results) => {
         if (err) {
-            console.error('Error fetching reply for delete:', err);
+            console.error('Error fetching reply:', err);
             return res.status(500).send('Error fetching reply.');
         }
 
         if (results.length === 0) {
-            return res.status(404).send('Reply not found.');
+            // אם התגובה לא קיימת
+            return res.render('error', { 
+                title: 'Reply Not Found', 
+                message: 'The reply you are trying to delete does not exist.', 
+                redirectUrl: `/feedbacks` 
+            });
         }
 
         const reply = results[0];
 
-        // בדיקת בעלות
+        // **בדיקת בעלות על התגובה**
         if (reply.username !== currentUsername) {
-            return res.status(403).send('You are not allowed to delete this reply.');
+            return res.render('error', { 
+                title: 'Access Denied', 
+                message: 'You are not allowed to delete this reply.', 
+                redirectUrl: `/feedbacks` 
+            });
         }
 
-        // מחיקת התגובה אם המשתמש הוא הבעלים
-        const deleteQuery = 'DELETE FROM replies WHERE id = ? AND feedback_id = ?';
-        connection.query(deleteQuery, [replyId, feedbackId], (err) => {
-            if (err) {
-                console.error('Error deleting reply:', err);
+        // אם המשתמש הוא הבעלים, מוחקים את התגובה
+        const deleteReplyQuery = 'DELETE FROM replies WHERE id = ? AND feedback_id = ?';
+        connection.query(deleteReplyQuery, [replyId, feedbackId], (deleteErr) => {
+            if (deleteErr) {
+                console.error('Error deleting reply:', deleteErr);
                 return res.status(500).send('Error deleting reply.');
             }
 
-            res.redirect('/feedbacks'); // חזרה לעמוד הפידבקים
+            // מחיקה הצליחה, חזרה לעמוד הפידבקים
+            res.redirect(`/feedbacks`);
         });
     });
 });
+
+
 
 
 
