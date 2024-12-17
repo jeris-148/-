@@ -208,18 +208,7 @@ app.post('/auth/register', (req, res) => {
     });
 });
 
-app.get('/feedbacks', (req, res) => {
-    const sqlSelect = 'SELECT * FROM feedback ORDER BY created_at DESC';
-    connection.query(sqlSelect, (err, feedbacks) => {
-        if (err) {
-            console.error('Error fetching feedbacks:', err);
-            return res.status(500).send('Error fetching feedbacks.');
-        }
 
-        // העברת נתונים לתבנית
-        res.render('feedback', { feedbacks });
-    });
-});
 
 
 app.post('/feedback/:id/delete', (req, res) => {
