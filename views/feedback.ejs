@@ -87,23 +87,42 @@
                     <h5>Replies:</h5>
                     <% if (feedback.replies && feedback.replies.length > 0) { %>
                         <% feedback.replies.forEach(function(reply) { %>
-                            <div style="margin-bottom: 10px;">
-                                <strong><%= reply.username %></strong>: <%= reply.message %>
-                                <small style="color: #aaa;">(<%= new Date(reply.created_at).toLocaleString() %>)</small>
+                            <div style="margin-bottom: 15px;border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+                                <strong style="color: #333; font-size: 14px;">
+                                    <%= reply.username %>:
+                                </strong>
+                                <!-- הדגשת שם מתויג אם יש -->
+                                <span style="font-size: 14px; color: #555;">
+                                    <% let cleanMessage = reply.message.replace(/@(\w+)/g, function(match, p1) {
+                                        return p1 ? '<span style="color: #007bff; font-weight: bold;">@' + p1 + '</span>' : '';
+                                    }) %>
+                                    
+                                    <%- cleanMessage %> <!-- רינדור התוכן הנקי -->
+                                </span>
+                
                                 
-                              <!-- כפתור עריכת Reply -->
-<form action="/feedback/<%= feedback.id %>/reply/<%= reply.id %>/edit" method="GET" style="margin-top: 5px;">
-    <button type="submit" style="
-        padding: 5px 10px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 12px;
-    ">Edit Reply</button>
-</form>
-
+                                <% if (reply.tagged_user && reply.tagged_user !== 'undefined') { %>
+                                    <div style="color: #ff0000; font-weight: bold;">
+                                        Tagged: @<%= reply.tagged_user %>
+                                    </div>
+                                <% } %>
+                                <small style="color: #aaa; display: block; margin-top: 5px;">
+                                    (<%= new Date(reply.created_at).toLocaleString() %>)
+                                </small>
+                
+                                <!-- כפתור עריכת Reply -->
+                                <form action="/feedback/<%= feedback.id %>/reply/<%= reply.id %>/edit" method="GET" style="margin-top: 5px;">
+                                    <button type="submit" style="
+                                        padding: 5px 10px;
+                                        background-color: #4CAF50;
+                                        color: white;
+                                        border: none;
+                                        border-radius: 5px;
+                                        cursor: pointer;
+                                        font-size: 12px;
+                                    ">Edit Reply</button>
+                                </form>
+                
                                 <!-- כפתור מחיקת Reply -->
                                 <form action="/feedback/<%= feedback.id %>/reply/<%= reply.id %>/delete" method="POST" style="margin-top: 5px;">
                                     <button type="submit" style="
@@ -122,10 +141,11 @@
                         <p>No replies yet.</p>
                     <% } %>
                 </div>
+                
 
                 <!-- טופס להוספת תגובה -->
                 <form action="/feedback/<%= feedback.id %>/reply" method="POST" style="margin-top: 20px;">
-                    <textarea name="message" placeholder="Write your reply" rows="2" required style="width: 100%; margin-bottom: 10px;"></textarea>
+                    <textarea name="message" placeholder="Write your reply (Use @username to tag someone)" rows="2" required style="width: 100%; margin-bottom: 10px;"></textarea>
                     <input type="hidden" name="username" value="<%= username %>"> <!-- הוספת השם באופן אוטומטי -->
                     <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px;">Reply</button>
                 </form>
