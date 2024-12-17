@@ -182,31 +182,57 @@ app.post('/auth/register', (req, res) => {
     
 
     app.get('/feedbacks', (req, res) => {
-    const feedbackSql = 'SELECT * FROM feedback ORDER BY created_at DESC';
-    const replySql = 'SELECT * FROM replies ORDER BY created_at ASC';
+    const username = req.session.username; // שם המשתמש המחובר
 
-    connection.query(feedbackSql, (err, feedbacks) => {
+    // שאילתא לשליפת כל הפידבקים
+    const feedbackSql = `
+        SELECT f.id AS feedback_id, f.username, f.rating, f.message, f.created_at,
+               r.id AS reply_id, r.username AS reply_username, r.message AS reply_message, r.created_at AS reply_created_at
+        FROM feedback f
+        LEFT JOIN replies r ON f.id = r.feedback_id
+        ORDER BY f.created_at DESC, r.created_at ASC
+    `;
+
+    connection.query(feedbackSql, (err, results) => {
         if (err) {
-            console.error('Error fetching feedbacks:', err);
-            return res.status(500).send('Error fetching feedbacks.');
+            console.error('Error fetching feedbacks and replies:', err);
+            return res.status(500).send('Error fetching feedbacks and replies.');
         }
 
-        connection.query(replySql, (err, replies) => {
-            if (err) {
-                console.error('Error fetching replies:', err);
-                return res.status(500).send('Error fetching replies.');
+        // סידור הפידבקים עם התגובות שלהם
+        const feedbacks = [];
+        const feedbackMap = new Map();
+
+        results.forEach(row => {
+            // אם הפידבק לא קיים במפה, נוסיף אותו
+            if (!feedbackMap.has(row.feedback_id)) {
+                feedbackMap.set(row.feedback_id, {
+                    id: row.feedback_id,
+                    username: row.username,
+                    rating: row.rating,
+                    message: row.message,
+                    created_at: row.created_at,
+                    replies: []
+                });
+                feedbacks.push(feedbackMap.get(row.feedback_id));
             }
 
-            // סידור התגובות לפי פידבקים
-            const feedbackWithReplies = feedbacks.map((feedback) => {
-                feedback.replies = replies.filter(reply => reply.feedback_id === feedback.id);
-                return feedback;
-            });
-
-            res.render('feedback', { feedbacks: feedbackWithReplies, username: req.session.username });
+            // הוספת תגובה לפידבק
+            if (row.reply_id) {
+                feedbackMap.get(row.feedback_id).replies.push({
+                    id: row.reply_id,
+                    username: row.reply_username,
+                    message: row.reply_message,
+                    created_at: row.reply_created_at
+                });
+            }
         });
+
+        // שליחה ל-EJS עם הפידבקים והתגובות
+        res.render('feedback', { feedbacks, username });
     });
 });
+
 
 
 
