@@ -497,19 +497,17 @@
         <!--/.Carousel Wrapper-->
 
     </section>
-    <!-- what people say-->
+    <!-- what people say 'feedback'-->
+
     <section class="feedback mt-5" id="feedback" style="background-image: url(./img/people/smiling-architect-holding-tablet-showing-construction-worker-something-he-imagined-construction-worker-holding-blueprints-construction-site-interior_2.avif ); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed;">
         <div class="container mb-5">
-            <h2 class="text-center" data-aos="fade-up" data-aos-duration="2500" style="color: white;">Feedback</h2>
-            <p class="text-center feedback__subtitle mb-5" data-aos="fade-up" data-aos-duration="2500" style="color: white;">
+            <h1 class="text-center" data-aos="fade-up" data-aos-duration="2500" style="color: rgb(5, 246, 61);">Feedback</h1>
+            <h2 class="text-center feedback__subtitle mb-5" data-aos="fade-up" data-aos-duration="2500" style="color: rgb(36, 10, 228);">
                 We would love to hear your thoughts about our service
-            </p>
+            </h2>
             <div class="feedback-form" style="background-color: rgba(255, 255, 255, 0.8); padding: 40px; border-radius: 10px; max-width: 600px; margin: 0 auto;">
                 <form action="/feedback" method="POST">
-                    <div class="form-group">
-                        <label for="name" style="color: #333;">Your Name</label>
-                        <input type="text" id="name" name="name" required style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px;">
-                    </div>
+                    
     
                     <div class="form-group">
                         <label for="rating" style="color: #333;">Your Rating</label>
@@ -527,42 +525,79 @@
                         <textarea id="message" name="message" rows="4" required style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px;"></textarea>
                     </div>
     
-                    <div class="form-buttons">
-                        <button type="submit" style="background-color: #28a745; color: white; padding: 12px 30px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s ease;">Submit Feedback</button>
+                    <div class="form-buttons" style="margin-top: 20px; text-align: center; display: flexbox; justify-content: center; gap: 15px;">
+                        <!-- SUBMIT FEEDBACK -->
+                        <button type="submit" style="background-color: #28a745; color: white; padding: 12px 30px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s ease;">
+                            Submit Feedback
+                        </button>
+                    
+                        <!-- VIEW PUBLIC FEEDBACK -->
+                        <button type="button" style="background-color: #007bff; color: white; padding: 12px 30px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s ease;" onclick="window.location.href='/public-feedbacks'">
+                            View Public Feedback
+                        </button>
                     </div>
+                    
+                        
+                    
                 </form>
             </div>
         </div>
     </section>
+    <section id="feedback-list" style="padding: 20px; background-color: #f9f9f9;">
+        <h2 style="text-align: center;">User Feedback</h2>
+        <div id="feedback-container" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
+            <!-- Feedback cards will be added here dynamically -->
+        </div>
+    </section>
     
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+    // Fetch feedbacks from the server
+    fetch('/feedbacks') // Ensure your server provides this endpoint
+        .then(response => response.json())
+        .then(data => {
+            const feedbackContainer = document.getElementById('feedback-container');
+            feedbackContainer.innerHTML = ''; // Clear existing content
+
+            // Check if there are any feedbacks
+            if (data.length === 0) {
+                feedbackContainer.innerHTML = '<p>No feedbacks yet. Be the first to leave one!</p>';
+                return;
+            }
+
+            // Add each feedback as a card
+            data.forEach(feedback => {
+                const feedbackCard = `
+                    <div style="
+                        border: 1px solid #ddd;
+                        padding: 15px;
+                        border-radius: 10px;
+                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                        max-width: 300px;
+                        background: white;
+                        text-align: center;
+                    ">
+                        <h4 style="margin-bottom: 5px; color: #333;">${feedback.name}</h4>
+                        <p style="margin: 0; font-size: 14px; color: #888;">Rating: ${feedback.rating} / 5</p>
+                        <p style="margin-top: 10px; font-size: 14px;">${feedback.message}</p>
+                        <small style="color: #aaa;">Submitted on: ${new Date(feedback.created_at).toLocaleString()}</small>
+                    </div>
+                `;
+                feedbackContainer.innerHTML += feedbackCard;
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching feedbacks:', error);
+        });
+});
+
+    </script>
     
     
 
     
-    <script>
-        // שליפת הפידבקים באמצעות Fetch
-        fetch('/feedbacks')
-            .then(response => response.json())
-            .then(data => {
-                const feedbackContainer = document.getElementById('feedback-container');
-                feedbackContainer.innerHTML = ''; // ניקוי התוכן
     
-                data.forEach(feedback => {
-                    const feedbackCard = `
-                        <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; background: #fff;">
-                            <h4>${feedback.name}</h4>
-                            <p><strong>Rating:</strong> ${feedback.rating} / 5</p>
-                            <p>${feedback.message}</p>
-                            <small>Submitted on: ${new Date(feedback.created_at).toLocaleString()}</small>
-                        </div>
-                    `;
-                    feedbackContainer.innerHTML += feedbackCard;
-                });
-            })
-            .catch(error => {
-                console.error('Error fetching feedbacks:', error);
-            });
-    </script>
     
 
     <!-- Our company -->
