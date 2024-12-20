@@ -270,8 +270,108 @@ app.post('/auth/register', (req, res) => {
     });
   });
 
+  app.get('/view-feedbacks', (req, res) => {
+    // שאילתא לשליפת כל הפידבקים עם התגובות
+    const feedbackSql = `
+        SELECT f.id AS feedback_id, f.username, f.rating, f.message, f.created_at,
+               r.id AS reply_id, r.username AS reply_username, r.message AS reply_message, r.created_at AS reply_created_at
+        FROM feedback f
+        LEFT JOIN replies r ON f.id = r.feedback_id
+        ORDER BY f.created_at DESC, r.created_at ASC
+    `;
+
+    connection.query(feedbackSql, (err, results) => {
+        if (err) {
+            console.error('Error fetching feedbacks and replies:', err);
+            return res.status(500).send('Error fetching feedbacks and replies.');
+        }
+
+        // סידור הפידבקים עם התגובות שלהם
+        const feedbacks = [];
+        const feedbackMap = new Map();
+
+        results.forEach(row => {
+            // אם הפידבק לא קיים במפה, נוסיף אותו
+            if (!feedbackMap.has(row.feedback_id)) {
+                feedbackMap.set(row.feedback_id, {
+                    id: row.feedback_id,
+                    username: row.username,
+                    rating: row.rating,
+                    message: row.message,
+                    created_at: row.created_at,
+                    replies: []
+                });
+                feedbacks.push(feedbackMap.get(row.feedback_id));
+            }
+
+            // הוספת תגובה לפידבק
+            if (row.reply_id) {
+                feedbackMap.get(row.feedback_id).replies.push({
+                    id: row.reply_id,
+                    username: row.reply_username,
+                    message: row.reply_message,
+                    created_at: row.reply_created_at
+                });
+            }
+        });
+
+        // שליחה ל-EJS עם הפידבקים והתגובות
+        res.render('view-feedback', { feedbacks }); // עמוד תצוגה ציבורי
+    });
+});
+
+
     
     
+  app.get('/public-feedbacks', (req, res) => {
+    // שאילתא לשליפת כל הפידבקים עם התגובות
+    const feedbackSql = `
+        SELECT f.id AS feedback_id, f.username, f.rating, f.message, f.created_at,
+               r.id AS reply_id, r.username AS reply_username, r.message AS reply_message, r.created_at AS reply_created_at
+        FROM feedback f
+        LEFT JOIN replies r ON f.id = r.feedback_id
+        ORDER BY f.created_at DESC, r.created_at ASC
+    `;
+
+    connection.query(feedbackSql, (err, results) => {
+        if (err) {
+            console.error('Error fetching feedbacks and replies:', err);
+            return res.status(500).send('Error fetching feedbacks and replies.');
+        }
+
+        // סידור הפידבקים עם התגובות שלהם
+        const feedbacks = [];
+        const feedbackMap = new Map();
+
+        results.forEach(row => {
+            // אם הפידבק לא קיים במפה, נוסיף אותו
+            if (!feedbackMap.has(row.feedback_id)) {
+                feedbackMap.set(row.feedback_id, {
+                    id: row.feedback_id,
+                    username: row.username,
+                    rating: row.rating,
+                    message: row.message,
+                    created_at: row.created_at,
+                    replies: []
+                });
+                feedbacks.push(feedbackMap.get(row.feedback_id));
+            }
+
+            // הוספת תגובה לפידבק
+            if (row.reply_id) {
+                feedbackMap.get(row.feedback_id).replies.push({
+                    id: row.reply_id,
+                    username: row.reply_username,
+                    message: row.reply_message,
+                    created_at: row.reply_created_at
+                });
+            }
+        });
+
+        // שליחה ל-EJS עם הפידבקים והתגובות
+        res.render('public-feedback', { feedbacks ,username: req.session.username}); // עמוד תצוגה ציבורי
+    });
+});
 
 
 
@@ -302,7 +402,7 @@ app.post('/feedback/:id/delete', (req, res) => {
         // בדיקת בעלות
         if (feedback.username !== currentUsername) {
             return res.status(403).render('error', {
-                title: 'Permission Denied',
+                title: 'Access Denied',
                 message: 'You are not allowed to delete this feedback.',
                 redirectUrl: '/feedbacks'
             });
