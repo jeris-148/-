@@ -121,35 +121,73 @@ app.post('/auth/register', (req, res) => {
 
 
     app.post('/feedback', (req, res) => {
-        const { rating, message } = req.body; // קבלת הדירוג וההודעה מהטופס
-        const username = req.session.username; // קבלת שם המשתמש מתוך ה-Session
-    
-        // בדיקה אם כל השדות נמסרו
+        const { rating, message } = req.body; // Get rating and message from form
+        const username = req.session.username; // Get username from session
+      
+        // Validate input
         if (!username || !rating || !message) {
-            return res.status(400).send('All fields are required.');
+          return res.status(400).send('All fields are required.');
         }
-    
-        // הוספת הפידבק למסד הנתונים
-        const sqlInsert = 'INSERT INTO feedback (username, rating, message) VALUES (?, ?, ?)';
+      
+        // Insert feedback into database
+        const sqlInsert = 'INSERT INTO feedback (username, rating, message, created_at) VALUES (?, ?, ?, NOW())';
         connection.query(sqlInsert, [username, rating, message], (err) => {
+          if (err) {
+            console.error('Error saving feedback:', err);
+            return res.status(500).send('Error saving feedback.');
+          }
+      
+          // Fetch all feedback after inserting the new feedback
+          const sqlSelect = `
+            SELECT f.id AS feedback_id, f.username, f.rating, f.message, f.created_at,
+                   r.id AS reply_id, r.message AS reply_message, r.created_at AS reply_created_at, r.username AS reply_username
+            FROM feedback f
+            LEFT JOIN replies r ON f.id = r.feedback_id
+            ORDER BY f.created_at DESC, r.created_at ASC
+          `;
+          connection.query(sqlSelect, (err, rows) => {
             if (err) {
-                console.error('Error saving feedback:', err);
-                return res.status(500).send('Error saving feedback.');
+              console.error('Error fetching feedbacks:', err);
+              return res.status(500).send('Error fetching feedbacks.');
             }
-    
-            // שליפת כל הפידבקים לאחר הכנסת הפידבק החדש
-            const sqlSelect = 'SELECT * FROM feedback ORDER BY created_at DESC';
-            connection.query(sqlSelect, (err, results) => {
-                if (err) {
-                    console.error('Error fetching feedbacks:', err);
-                    return res.status(500).send('Error fetching feedbacks.');
-                }
-    
-                // שליחה של הפידבקים לעמוד EJS
-                res.render('feedback.ejs', { feedbacks: results, username }); // הוספת username ל-EJS
-            });
+      
+            // Organize data into structured format
+            const feedbackWithReplies = rows.reduce((acc, row) => {
+              const feedback = acc.find((fb) => fb.id === row.feedback_id);
+      
+              if (!feedback) {
+                acc.push({
+                  id: row.feedback_id,
+                  username: row.username,
+                  rating: row.rating,
+                  message: row.message,
+                  created_at: row.created_at,
+                  replies: row.reply_id
+                    ? [{
+                        id: row.reply_id,
+                        message: row.reply_message,
+                        created_at: row.reply_created_at,
+                        username: row.reply_username,
+                      }]
+                    : [],
+                });
+              } else if (row.reply_id) {
+                feedback.replies.push({
+                  id: row.reply_id,
+                  message: row.reply_message,
+                  created_at: row.reply_created_at,
+                  username: row.reply_username,
+                });
+              }
+      
+              return acc;
+            }, []);
+      
+            // Render the feedbacks and replies in EJS template
+            res.render('feedback.ejs', { feedbacks: feedbackWithReplies, username }); // Pass username and structured data to EJS
+          });
         });
-    });
+      });
     
 
     app.post('/feedback/:id/reply', (req, res) => {
@@ -182,56 +220,58 @@ app.post('/auth/register', (req, res) => {
     
 
     app.get('/feedbacks', (req, res) => {
-    const username = req.session.username; // שם המשתמש המחובר
-
-    // שאילתא לשליפת כל הפידבקים
-    const feedbackSql = `
-        SELECT f.id AS feedback_id, f.username, f.rating, f.message, f.created_at,
-               r.id AS reply_id, r.username AS reply_username, r.message AS reply_message, r.created_at AS reply_created_at
-        FROM feedback f
-        LEFT JOIN replies r ON f.id = r.feedback_id
-        ORDER BY f.created_at DESC, r.created_at ASC
+        const sqlSelect = `
+      SELECT f.id AS feedback_id, f.username, f.rating, f.message, f.created_at,
+             r.id AS reply_id, r.message AS reply_message, r.created_at AS reply_created_at, r.username AS reply_username
+      FROM feedback f
+      LEFT JOIN replies r ON f.id = r.feedback_id
+      ORDER BY f.created_at DESC, r.created_at ASC
     `;
+    connection.query(sqlSelect, (err, rows) => {
+      if (err) {
+        console.error('Error fetching feedbacks:', err);
+        return res.status(500).send('Error fetching feedbacks.');
+      }
 
-    connection.query(feedbackSql, (err, results) => {
-        if (err) {
-            console.error('Error fetching feedbacks and replies:', err);
-            return res.status(500).send('Error fetching feedbacks and replies.');
+      // Organize data into structured format
+      const feedbackWithReplies = rows.reduce((acc, row) => {
+        const feedback = acc.find((fb) => fb.id === row.feedback_id);
+
+        if (!feedback) {
+          acc.push({
+            id: row.feedback_id,
+            username: row.username,
+            rating: row.rating,
+            message: row.message,
+            created_at: row.created_at,
+            replies: row.reply_id
+              ? [{
+                  id: row.reply_id,
+                  message: row.reply_message,
+                  created_at: row.reply_created_at,
+                  username: row.reply_username,
+                }]
+              : [],
+          });
+        } else if (row.reply_id) {
+          feedback.replies.push({
+            id: row.reply_id,
+            message: row.reply_message,
+            created_at: row.reply_created_at,
+            username: row.reply_username,
+          });
         }
 
-        // סידור הפידבקים עם התגובות שלהם
-        const feedbacks = [];
-        const feedbackMap = new Map();
+        return acc;
+      }, []);
 
-        results.forEach(row => {
-            // אם הפידבק לא קיים במפה, נוסיף אותו
-            if (!feedbackMap.has(row.feedback_id)) {
-                feedbackMap.set(row.feedback_id, {
-                    id: row.feedback_id,
-                    username: row.username,
-                    rating: row.rating,
-                    message: row.message,
-                    created_at: row.created_at,
-                    replies: []
-                });
-                feedbacks.push(feedbackMap.get(row.feedback_id));
-            }
-
-            // הוספת תגובה לפידבק
-            if (row.reply_id) {
-                feedbackMap.get(row.feedback_id).replies.push({
-                    id: row.reply_id,
-                    username: row.reply_username,
-                    message: row.reply_message,
-                    created_at: row.reply_created_at
-                });
-            }
-        });
-
-        // שליחה ל-EJS עם הפידבקים והתגובות
-        res.render('feedback', { feedbacks, username });
+      // Render the feedbacks and replies in EJS template
+      res.render('feedback.ejs', { feedbacks: feedbackWithReplies, username: req.session.username }); // Pass username and structured data to EJS
     });
-});
+  });
+
+    
+    
 
 
 
